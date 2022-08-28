@@ -354,13 +354,13 @@ contract TimeTreasury is Ownable {
         @return send_ uint
      */
     function deposit( uint _amount, address _token, uint _profit ) external returns ( uint send_ ) {
-        require( isReserveToken[ _token ] || isLiquidityToken[ _token ], "Not accepted" );
+        require( isReserveToken[ _token ] || isLiquidityToken[ _token ], "Not accepted A" );
         IERC20( _token ).safeTransferFrom( msg.sender, address(this), _amount );
 
         if ( isReserveToken[ _token ] ) {
-            require( isReserveDepositor[ msg.sender ], "Not approved" );
+            require( isReserveDepositor[ msg.sender ], "Not approved A" );
         } else {
-            require( isLiquidityDepositor[ msg.sender ], "Not approved" );
+            require( isLiquidityDepositor[ msg.sender ], "Not approved A2" );
         }
 
         uint value = valueOf(_token, _amount);
@@ -381,8 +381,8 @@ contract TimeTreasury is Ownable {
         @param _token address
      */
     function withdraw( uint _amount, address _token ) external {
-        require( isReserveToken[ _token ], "Not accepted" ); // Only reserves can be used for redemptions
-        require( isReserveSpender[ msg.sender ], "Not approved" );
+        require( isReserveToken[ _token ], "Not accepted B" ); // Only reserves can be used for redemptions
+        require( isReserveSpender[ msg.sender ], "Not approved B" );
 
         uint value = valueOf( _token, _amount );
         Time.burnFrom( msg.sender, value );
@@ -401,8 +401,8 @@ contract TimeTreasury is Ownable {
         @param _token address
      */
     function incurDebt( uint _amount, address _token ) external {
-        require( isDebtor[ msg.sender ], "Not approved" );
-        require( isReserveToken[ _token ], "Not accepted" );
+        require( isDebtor[ msg.sender ], "Not approved C" );
+        require( isReserveToken[ _token ], "Not accepted C" );
 
         uint value = valueOf( _token, _amount );
 
@@ -428,8 +428,8 @@ contract TimeTreasury is Ownable {
         @param _token address
      */
     function repayDebtWithReserve( uint _amount, address _token ) external {
-        require( isDebtor[ msg.sender ], "Not approved" );
-        require( isReserveToken[ _token ], "Not accepted" );
+        require( isDebtor[ msg.sender ], "Not approved D" );
+        require( isReserveToken[ _token ], "Not accepted D" );
 
         IERC20( _token ).safeTransferFrom( msg.sender, address(this), _amount );
 
@@ -467,11 +467,11 @@ contract TimeTreasury is Ownable {
     function manage( address _token, uint _amount ) external {
         uint value = valueOf(_token, _amount);
         if( isLiquidityToken[ _token ] ) {
-            require( isLiquidityManager[ msg.sender ], "Not approved" );
+            require( isLiquidityManager[ msg.sender ], "Not approved E" );
             require(value <= excessReserves());
         } else {
             if (isReserveToken[ _token ]) require(value <= excessReserves());
-            require( isReserveManager[ msg.sender ], "Not approved" );
+            require( isReserveManager[ msg.sender ], "Not approved E2" );
         }
         
         limitRequirements(msg.sender, value);
@@ -487,7 +487,7 @@ contract TimeTreasury is Ownable {
         @notice send epoch reward to staking contract
      */
     function mintRewards( address _recipient, uint _amount ) external {
-        require( isRewardManager[ msg.sender ], "Not approved" );
+        require( isRewardManager[ msg.sender ], "Not approved F" );
         require( _amount <= excessReserves(), "Insufficient reserves" );
         limitRequirements(msg.sender, _amount);
         Time.mint( _recipient, _amount );
